@@ -73,7 +73,7 @@ impl fmt::Display for StatusCode {
 pub enum SummaryCode {
     // 100-399, 920-959
     Credit(CreditSummary),
-    // 400-699, 960-999
+    // 400-690, 960-999
     Debit(DebitSummary),
     // 700-799
     Loan(LoanSummary),
@@ -84,7 +84,7 @@ impl TryFrom<u16> for SummaryCode {
     fn try_from(code: u16) -> Result<SummaryCode, u16> {
         match code {
             c @ 100...399 | c @ 920...959 => c.try_into().map(SummaryCode::Credit),
-            c @ 400...469 | c @ 960...999 => c.try_into().map(SummaryCode::Debit),
+            c @ 400...690 | c @ 960...999 => c.try_into().map(SummaryCode::Debit),
             c @ 700...799 => c.try_into().map(SummaryCode::Loan),
             _ => Err(code),
         }
@@ -322,7 +322,8 @@ enum_mapping! {
         TotalUniversalCredits(385),
         TotalFreightPaymentCredits(389),
         // Miscellaneous
-        TotalMiscCredits(390);
+        TotalMiscCredits(390),
+        TotalLoanPayment(720);
 
         Custom {
             from: c @ 920...959 => Ok(CreditSummary::Custom(c));
@@ -417,7 +418,8 @@ enum_mapping! {
         InterceptDebits(665),
         TotalBackValueDebits(670),
         TotalUniversalDebits(685),
-        FrbFreightPaymentDebits(689);
+        FrbFreightPaymentDebits(689),
+        TotalMiscellaneousDebits(690);
 
         Custom {
             from: c @ 960...999 => Ok(DebitSummary::Custom(c));

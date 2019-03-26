@@ -342,6 +342,7 @@ pub enum AccountInfo {
     Status {
         code: StatusCode,
         amount: Option<i64>,
+        funds: Option<FundsType>,
     },
 }
 
@@ -365,12 +366,14 @@ impl AccountInfo {
 impl fmt::Display for AccountInfo {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            AccountInfo::Status { code, amount } => {
-                match amount {
-                    None => write!(f, "{}", code),
-                    Some(amount) => write!(f, "{}: {}", code, amount),
-                }
-            }
+            AccountInfo::Status {
+                code,
+                amount,
+                ref funds,
+            } => match amount {
+                None => write!(f, "{}", code),
+                Some(amount) => write!(f, "{}: {}", code, amount),
+            },
             AccountInfo::Summary {
                 code,
                 amount,

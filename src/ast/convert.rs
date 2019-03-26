@@ -262,7 +262,7 @@ impl Converter {
                         })
                     }
                 }
-            }
+            },
             ConverterProgress::File => {
                 match record {
                     ParsedRecord::GroupHeader(gh) => {
@@ -629,21 +629,19 @@ impl ast::ParsedAccountInfo {
             (None, None, None, None) => None,
             (Some(code), amount, item_count, funds) => {
                 if let Ok(code) = data::StatusCode::try_from(code) {
-                    match (item_count, funds) {
-                        (None, None) => {
-                            Some(AI::Status {
-                                code: code,
-                                amount: {
-                                    if let Some(a) = amount {
-                                        control_total += a;
-                                    }
-                                    amount
-                                },
-                            })
-                        }
-                        (Some(_), _) => return Err(CE::StatusItemCount),
-                        (_, Some(_)) => return Err(CE::StatusFunds),
-                    }
+                    // ESC item_count is never set for status codes
+                    Some(AI::Status {
+                        code: code,
+                        funds: funds
+                            .map_or(Ok(None), |f| f.convert().map(Some))
+                            .map_err(CE::Funds)?,
+                        amount: {
+                            if let Some(a) = amount {
+                                control_total += a;
+                            }
+                            amount
+                        },
+                    })
                 } else if let Ok(code) = data::SummaryCode::try_from(code) {
                     Some(AI::Summary {
                         code: code,
@@ -659,6 +657,7 @@ impl ast::ParsedAccountInfo {
                             .map_err(CE::Funds)?,
                     })
                 } else {
+                    // ESC add code to enum
                     return Err(CE::InvalidCode);
                 }
             }
